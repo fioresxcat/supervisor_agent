@@ -1,0 +1,1 @@
+docker run -p 8000:8000 --name supervisor-instance task-supervisor-agent

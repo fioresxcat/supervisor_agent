@@ -1,0 +1,16 @@
+2025-04-15 21:31:10 - supervisor_agent - INFO - {"timestamp": "2025-04-15T21:31:10.692637", "level": "INFO", "logger": "supervisor_agent", "message": "Starting Task Supervisor Agent"}
+2025-04-15 21:31:10 - supervisor_agent - INFO - {"timestamp": "2025-04-15T21:31:10.693384", "level": "INFO", "logger": "supervisor_agent", "message": "Scheduled morning check for 21:31"}
+2025-04-15 21:31:10 - supervisor_agent - INFO - {"timestamp": "2025-04-15T21:31:10.693722", "level": "INFO", "logger": "supervisor_agent", "message": "Scheduled evening check for 21:31"}
+2025-04-15 21:31:27 - supervisor_agent - INFO - {"timestamp": "2025-04-15T21:31:27.287130", "level": "INFO", "logger": "supervisor_agent", "message": "Shutting down Task Supervisor Agent"}
+2025-04-15 21:34:17 - supervisor_agent - INFO - {"timestamp": "2025-04-15T21:34:17.309405", "level": "INFO", "logger": "supervisor_agent", "message": "Starting Task Supervisor Agent"}
+2025-04-15 21:34:17 - supervisor_agent - INFO - {"timestamp": "2025-04-15T21:34:17.310272", "level": "INFO", "logger": "supervisor_agent", "message": "Scheduled morning check for 21:35"}
+2025-04-15 21:34:17 - supervisor_agent - INFO - {"timestamp": "2025-04-15T21:34:17.310806", "level": "INFO", "logger": "supervisor_agent", "message": "Scheduled evening check for 21:35"}
+2025-04-15 21:35:25 - supervisor_agent - INFO - {"timestamp": "2025-04-15T21:35:25.509884", "level": "INFO", "logger": "supervisor_agent", "message": "Shutting down Task Supervisor Agent"}
+2025-04-15 21:39:17 - supervisor_agent - INFO - [92mINFO: Starting Task Supervisor Agent[0m
+2025-04-15 21:39:17 - supervisor_agent - INFO - [92mINFO: Scheduled morning check for 21:40[0m
+2025-04-15 21:39:17 - supervisor_agent - INFO - [92mINFO: Scheduled evening check for 21:40[0m
+2025-04-15 21:39:59 - supervisor_agent - INFO - [92mINFO: Shutting down Task Supervisor Agent[0m
+2025-04-15 21:40:00 - supervisor_agent - INFO - [92mINFO[0m: Starting Task Supervisor Agent
+2025-04-15 21:40:00 - supervisor_agent - INFO - [92mINFO[0m: Scheduled morning check for 21:40
+2025-04-15 21:40:00 - supervisor_agent - INFO - [92mINFO[0m: Scheduled evening check for 21:40
+2025-04-15 21:40:20 - supervisor_agent - INFO - [92mINFO[0m: Shutting down Task Supervisor Agent
