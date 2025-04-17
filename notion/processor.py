@@ -3,6 +3,9 @@ from notion_client import Client
 import json
 from datetime import datetime
 from typing_extensions import List, Dict, Tuple, Optional, Any, Literal, Union
+from dotenv import load_dotenv
+
+load_dotenv()
 
 from utils import get_current_date, check_and_punish
 
