@@ -21,8 +21,8 @@ class ScheduleConfig(BaseModel):
     second: int = 0
 
 # Default check times
-MORNING_CHECK_TIME = ScheduleConfig(hour=8, minute=27, second=00)  # 7:00 AM
-EVENING_CHECK_TIME = ScheduleConfig(hour=21, minute=40, second=15)  # 11:59 PM
+MORNING_CHECK_TIME = ScheduleConfig(hour=8, minute=47, second=00)  # 7:00 AM
+EVENING_CHECK_TIME = ScheduleConfig(hour=9, minute=2, second=00)  # 11:59 PM
 scheduler = BackgroundScheduler()
 current_morning_schedule = MORNING_CHECK_TIME
 current_evening_schedule = EVENING_CHECK_TIME
@@ -43,7 +43,7 @@ async def lifespan(app: FastAPI):
         CronTrigger(hour=current_morning_schedule.hour, minute=current_morning_schedule.minute, second=current_morning_schedule.second),
         id='morning_task_check'
     )
-    logger.info(f"Scheduled morning check for {current_morning_schedule.hour:02d}:{current_morning_schedule.minute:02d}")
+    logger.info(f"Scheduled morning check for {current_morning_schedule.hour:02d}:{current_morning_schedule.minute:02d}:{current_morning_schedule.second:02d}")
     
     # Add evening check job (11:59 PM)
     scheduler.add_job(
@@ -51,7 +51,7 @@ async def lifespan(app: FastAPI):
         CronTrigger(hour=current_evening_schedule.hour, minute=current_evening_schedule.minute, second=current_evening_schedule.second),
         id='evening_task_check'
     )
-    logger.info(f"Scheduled evening check for {current_evening_schedule.hour:02d}:{current_evening_schedule.minute:02d}")
+    logger.info(f"Scheduled evening check for {current_evening_schedule.hour:02d}:{current_evening_schedule.minute:02d}:{current_evening_schedule.second:02d}")
     
     yield
     
@@ -174,7 +174,7 @@ if __name__ == "__main__":
         "agent:app", 
         host="0.0.0.0", 
         port=8000, 
-        reload=True,
+        reload=False,
         reload_dirs=[".", "./notion", "./send_token"],
         reload_excludes=["test_requests.py"]
     )

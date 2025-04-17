@@ -4,6 +4,7 @@ from web3 import Web3
 from eth_account import Account
 import json
 from dotenv import load_dotenv
+from logger import logger
 
 load_dotenv()
 
@@ -28,15 +29,15 @@ class TokenProcessor:
             True if the transaction was successful, False otherwise.
         """
         if not self.w3.is_connected():
-            print("Error: Not connected to Ethereum network.")
+            logger.error("Error: Not connected to Ethereum network.")
             return False
 
         if not Web3.is_address(recipient_address):
-            print(f"Error: Invalid recipient address: {recipient_address}")
+            logger.error(f"Error: Invalid recipient address: {recipient_address}")
             return False
 
         if amount <= 0:
-            print(f"Error: Amount must be positive: {amount}")
+            logger.error(f"Error: Amount must be positive: {amount}")
             return False
 
         try:
@@ -87,7 +88,7 @@ class TokenProcessor:
             # Sign and send transaction
             signed_txn = self.w3.eth.account.sign_transaction(transaction, self.private_key)
             tx_hash = self.w3.eth.send_raw_transaction(signed_txn.raw_transaction)
-            print(f"Transaction submitted. Waiting for confirmation... TX Hash: {tx_hash.hex()}")
+            logger.info(f"Transaction submitted. Waiting for confirmation... TX Hash: {tx_hash.hex()}")
 
             # Wait for transaction receipt with a timeout
             receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash, timeout=120) # Wait up to 120 seconds

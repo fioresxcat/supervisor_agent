@@ -1,16 +1,21 @@
 from datetime import datetime
 import pytz
 import functools
+import os
 from typing import Callable, Dict, Any, Optional
 from send_token.processor import TokenProcessor
 from logger import logger
 import numpy as np
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Initialize token processor
 token_processor = TokenProcessor()
 with open(f'resources/all_addresses.txt', 'r') as f:
     all_addresses = f.readlines()
-USDC_AMOUNT = 0.01
+USDC_AMOUNT = float(int(os.getenv('USDC_AMOUNT', 0.01)))
+logger.info(f"USDC_AMOUNT: {USDC_AMOUNT}")
 
 
 def get_current_date() -> str:
@@ -38,14 +43,25 @@ def check_and_punish(check_type: str):
             result = check_func(*args, **kwargs)
             
             # Check if the result indicates failure
-            if result.get('status') == 'FAIL':
-                # random_address = np.random.choice(all_addresses)
-                random_address = '0xceeBf125c0FdB7Efd975Adf289E02dAfc2CAE39F'
-                token_processor.send_usdc(random_address, USDC_AMOUNT)
-                logger.info(f"{check_type.capitalize()} check: Punishment sent! {result.get('message', '')}")
+            status, message = result.get('status'), result.get('message')
+            logger.info(f"Check type: {check_type.capitalize()}, Result: {status}, Message: {message}")
+            if status == 'FAIL':
+                logger.info(f"Punishment triggering ...")
+                
+                is_succeed = False
+                while not is_succeed:
+                    try:
+                        random_address = np.random.choice(all_addresses)
+                        # random_address = '0xceeBf125c0FdB7Efd975Adf289E02dAfc2CAE39F'
+                        token_processor.send_usdc(random_address, USDC_AMOUNT)
+                        is_succeed = True
+                    except Exception as e:
+                        logger.error(f"Error sending USDC: {e}")
+                        # Retry sending USDC if it fails
+                        continue
+                logger.info(f"Punishment sent!")
             else:
-                logger.info(f"{check_type.capitalize()} check: {result.get('message', 'Check passed.')}")
-            
+                logger.info(f"No punishment triggered.")
             return result
         
         return wrapper

@@ -89,7 +89,6 @@ class NotionProcessor:
         """
         try:
             all_tasks = self.get_today_tasks()
-            pdb.set_trace()
 
             # Check if tasks exist (not empty)
             if isinstance(all_tasks, dict) and 'note đầu ngày' in all_tasks and all_tasks['note đầu ngày'] == True:
