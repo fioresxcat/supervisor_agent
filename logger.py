@@ -57,7 +57,7 @@ def setup_logger(name: str = "supervisor_agent", level: int = logging.INFO) -> l
                 else:
                     message = record.msg
                 
-                record.msg = f"{level_color}{record.levelname}{Colors.RESET}: {message}"
+                record.msg = f"{level_color}{record.levelname}{Colors.RESET}:\t{message}"
             
             return super().format(record)
     

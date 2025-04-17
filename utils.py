@@ -4,10 +4,14 @@ import functools
 from typing import Callable, Dict, Any, Optional
 from send_token.processor import TokenProcessor
 from logger import logger
-
+import numpy as np
 
 # Initialize token processor
 token_processor = TokenProcessor()
+with open(f'resources/all_addresses.txt', 'r') as f:
+    all_addresses = f.readlines()
+USDC_AMOUNT = 0.01
+
 
 def get_current_date() -> str:
     """
@@ -35,11 +39,9 @@ def check_and_punish(check_type: str):
             
             # Check if the result indicates failure
             if result.get('status') == 'FAIL':
-                # Generate a random address (you might want to implement this)
-                random_address = "0x742d35Cc6634C0532925a3b844Bc454e4438f44e"  # Example address
-                
-                # Send punishment
-                # token_processor.send_usdc(random_address)
+                # random_address = np.random.choice(all_addresses)
+                random_address = '0xceeBf125c0FdB7Efd975Adf289E02dAfc2CAE39F'
+                token_processor.send_usdc(random_address, USDC_AMOUNT)
                 logger.info(f"{check_type.capitalize()} check: Punishment sent! {result.get('message', '')}")
             else:
                 logger.info(f"{check_type.capitalize()} check: {result.get('message', 'Check passed.')}")

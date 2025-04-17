@@ -4,6 +4,7 @@ import json
 from datetime import datetime
 from typing_extensions import List, Dict, Tuple, Optional, Any, Literal, Union
 from dotenv import load_dotenv
+import pdb
 
 load_dotenv()
 
@@ -19,8 +20,12 @@ class NotionProcessor:
     def __init__(self) -> None:
         self.notion = Client(auth=os.getenv('NOTION_API_KEY'))
     
+    def clean_emoji_from_text(self, text: str) -> str:
+        for emoji in ['✅', '❌', '⌛']:
+            text = text.replace(emoji, '')
+        return text.strip()
 
-    def parse_toggle_block(self, block):
+    def parse_toggle_block(self, block) -> Union[bool, Dict[str, Any]]:
         assert block["type"] == "toggle"
         toggle_text = block["toggle"]["rich_text"][0]["plain_text"]
         d = {}
@@ -28,13 +33,16 @@ class NotionProcessor:
         for sub_block in sub_blocks['results']:
             if sub_block['type'] == 'toggle':
                 text = sub_block["toggle"]["rich_text"][0]["plain_text"]
+                text = self.clean_emoji_from_text(text)
                 d[text] = self.parse_toggle_block(sub_block)
             elif sub_block['type'] == 'to_do':
                 text = sub_block["to_do"]["rich_text"][0]["plain_text"]
+                text = self.clean_emoji_from_text(text)
                 checked = sub_block["to_do"]["checked"]
                 d[text] = checked
         if len(d) == 0: # empty toggle
-            return {toggle_text: '✅' in toggle_text}
+            is_completed = '✅' in toggle_text
+            return is_completed
         return d
     
 
@@ -81,17 +89,18 @@ class NotionProcessor:
         """
         try:
             all_tasks = self.get_today_tasks()
-            
+            pdb.set_trace()
+
             # Check if tasks exist (not empty)
-            if all_tasks is None or (isinstance(all_tasks, dict) and len(all_tasks) == 0):
-                return {
-                    'status': 'FAIL',
-                    'message': 'No tasks found for today.'
-                }
-            else:
+            if isinstance(all_tasks, dict) and 'note đầu ngày' in all_tasks and all_tasks['note đầu ngày'] == True:
                 return {
                     'status': 'PASS',
                     'message': 'Tasks found for today.'
+                }
+            else:
+                return {
+                    'status': 'FAIL',
+                    'message': 'No tasks found for today.'
                 }
         except Exception as e:
             return {
@@ -155,7 +164,6 @@ class NotionProcessor:
 
 
 if __name__ == "__main__":
-    np = NotionProcessor(API_KEY)
-    # np.debug()
+    np = NotionProcessor()
     np.get_today_tasks()
     print(f'done')
