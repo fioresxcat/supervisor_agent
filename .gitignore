@@ -1,2 +1,14 @@
 test.json
 .env
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite
+*.log
+*.egg-info
+*.egg
+*.whl
+*.zip
+*.tar.gz
