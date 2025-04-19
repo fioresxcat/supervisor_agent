@@ -57,7 +57,8 @@ def setup_logger(name: str = "supervisor_agent", level: int = logging.INFO) -> l
                 else:
                     message = record.msg
                 
-                record.msg = f"{level_color}{record.levelname}{Colors.RESET}:\t{message}"
+                current_time = datetime.now().strftime('%H:%M:%S')
+                record.msg = f"{level_color}{record.levelname}{Colors.RESET} [{current_time}]:\t{message}"
             
             return super().format(record)
     
