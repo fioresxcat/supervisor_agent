@@ -21,8 +21,8 @@ class ScheduleConfig(BaseModel):
     second: int = 0
 
 # Default check times
-MORNING_CHECK_TIME = ScheduleConfig(hour=8, minute=47, second=00)  # 7:00 AM
-EVENING_CHECK_TIME = ScheduleConfig(hour=9, minute=2, second=00)  # 11:59 PM
+MORNING_CHECK_TIME = ScheduleConfig(hour=7, minute=0, second=00)  # 7:00 AM
+EVENING_CHECK_TIME = ScheduleConfig(hour=11, minute=59, second=59)  # 11:59 PM
 scheduler = BackgroundScheduler()
 current_morning_schedule = MORNING_CHECK_TIME
 current_evening_schedule = EVENING_CHECK_TIME
@@ -173,7 +173,7 @@ if __name__ == "__main__":
     uvicorn.run(
         "agent:app", 
         host="0.0.0.0", 
-        port=8000, 
+        port=6060, 
         reload=False,
         reload_dirs=[".", "./notion", "./send_token"],
         reload_excludes=["test_requests.py"]

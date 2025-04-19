@@ -53,11 +53,11 @@ def check_and_punish(check_type: str):
                     try:
                         random_address = np.random.choice(all_addresses)
                         # random_address = '0xceeBf125c0FdB7Efd975Adf289E02dAfc2CAE39F'
-                        token_processor.send_usdc(random_address, USDC_AMOUNT)
-                        is_succeed = True
+                        is_succeed = token_processor.send_usdc(random_address, USDC_AMOUNT)
                     except Exception as e:
                         logger.error(f"Error sending USDC: {e}")
                         # Retry sending USDC if it fails
+                        is_succeed = False
                         continue
                 logger.info(f"Punishment sent!")
             else:

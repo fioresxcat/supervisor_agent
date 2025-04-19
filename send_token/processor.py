@@ -91,7 +91,7 @@ class TokenProcessor:
             logger.info(f"Transaction submitted. Waiting for confirmation... TX Hash: {tx_hash.hex()}")
 
             # Wait for transaction receipt with a timeout
-            receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash, timeout=120) # Wait up to 120 seconds
+            receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash, timeout=1200) # Wait up to 120 seconds
 
             # Check transaction status from receipt
             if receipt['status'] == 1:
