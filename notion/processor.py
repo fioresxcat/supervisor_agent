@@ -9,6 +9,7 @@ import pdb
 load_dotenv()
 
 from utils import get_current_date, check_and_punish
+from llm.gemini import GeminiProcessor
 
 
 # page ids
@@ -19,7 +20,9 @@ PAGE_IDS = {
 class NotionProcessor:
     def __init__(self) -> None:
         self.notion = Client(auth=os.getenv('NOTION_API_KEY'))
-    
+        self.llm = GeminiProcessor()
+
+
     def clean_emoji_from_text(self, text: str) -> str:
         for emoji in ['✅', '❌', '⌛']:
             text = text.replace(emoji, '')
@@ -30,6 +33,7 @@ class NotionProcessor:
         toggle_text = block["toggle"]["rich_text"][0]["plain_text"]
         d = {}
         sub_blocks = self.notion.blocks.children.list(block_id=block["id"])
+        text_content = ''
         for sub_block in sub_blocks['results']:
             if sub_block['type'] == 'toggle':
                 text = sub_block["toggle"]["rich_text"][0]["plain_text"]
@@ -39,10 +43,19 @@ class NotionProcessor:
                 text = sub_block["to_do"]["rich_text"][0]["plain_text"]
                 text = self.clean_emoji_from_text(text)
                 checked = sub_block["to_do"]["checked"]
-                d[text] = checked
+                d[text] = {'result': 'PASS' if checked else 'FAIL', 'text_content': text}
+            elif sub_block['type'] == 'paragraph':
+                text = sub_block["paragraph"]["rich_text"][0]["plain_text"]
+                text = self.clean_emoji_from_text(text)
+                text_content += text
+        
         if len(d) == 0: # empty toggle
+            d['text_content'] = text_content
             is_completed = '✅' in toggle_text
-            return is_completed
+            return {'result': 'PASS' if is_completed else 'FAIL', 'text_content': text_content}
+        else:
+            d['text_content'] = text_content
+
         return d
     
 
@@ -81,6 +94,22 @@ class NotionProcessor:
         return incomplete_tasks
 
 
+    def check_task_content(self, task_content:str):
+        """
+            Check if the task content is valid
+        """
+        prompt = (
+            f'The morning note is the daily note where I write down random thoughts in the morning and write some inspriring quote to encourage me to do better today to complete all my tasks.\n'
+            f'Each day, I require myself to write this note for 2 purposes: get up early in the morning and give my self some encouragement to complete tasks.\n'
+            f'Here is my morning note for today:\n{task_content}.\n'
+            f'Please check if the morning note is actually valid and meaningful, or it\'s just some random bullshit that I write to mark the task as completed.'
+            f'If it is valid, please return "PASS", otherwise return "FAIL". The response should only contain "PASS" or "FAIL" and nothing else.'
+        )
+        response = self.llm.llm_request(user_prompt=prompt)
+        result = 'PASS' if 'pass' in response.lower() else 'FAIL'
+        return result
+    
+
     @check_and_punish('morning')
     def check_tasks_existence(self) -> Dict[str, Any]:
         """
@@ -88,23 +117,28 @@ class NotionProcessor:
         Returns a result with PASS/FAIL status.
         """
         def check_notedaungay():
-            return isinstance(all_tasks, dict) and 'note đầu ngày' in all_tasks and all_tasks['note đầu ngày'] == True
+            result = False
+            if isinstance(all_tasks, dict) and 'note đầu ngày' in all_tasks and all_tasks['note đầu ngày']['result'] == 'PASS':
+                result = True
+            return result
         
+
         def check_linhtinhtasks():
             if 'việc linh tinh' in all_tasks:
                 linhtinh_tasks = all_tasks['việc linh tinh']
                 if 'no any fucking porn' in linhtinh_tasks:
                     return True
-            
             return False
         
         is_pass, message, status = False, 'Not complete tasks', 'SUCCESS'
         try:
             all_tasks = self.get_today_tasks()
             if check_notedaungay() and check_linhtinhtasks():
-                is_pass = True
-                message = 'All tasks completed!'
-            status = 'SUCCESS'
+                notedaungay_content = all_tasks['note đầu ngày']['text_content']
+                if self.check_task_content(notedaungay_content) == 'PASS':
+                    is_pass = True
+                    message = 'All tasks completed!'
+
         except Exception as e:
             is_pass = True
             message = f'Error checking task existence: {str(e)}'
@@ -168,5 +202,6 @@ class NotionProcessor:
 
 if __name__ == "__main__":
     np = NotionProcessor()
-    np.get_today_tasks()
+    tasks = np.get_today_tasks()
+    pdb.set_trace()
     print(f'done')

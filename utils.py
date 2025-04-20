@@ -14,8 +14,8 @@ load_dotenv()
 # Initialize token processor
 token_processor = TokenProcessor()
 with open(f'resources/all_addresses.txt', 'r') as f:
-    all_addresses = f.readlines()
-USDC_AMOUNT = float(int(os.getenv('USDC_AMOUNT', 0.01)))
+    all_addresses = [line.strip() for line in f.readlines()]
+USDC_AMOUNT = float(os.getenv('USDC_AMOUNT', 0.01))
 logger.info(f"USDC_AMOUNT: {USDC_AMOUNT}")
 
 
@@ -44,9 +44,9 @@ def check_and_punish(check_type: str):
             result = check_func(*args, **kwargs)
             
             # Check if the result indicates failure
-            status, message = result.get('status'), result.get('message')
-            logger.info(f"Check type: {check_type.capitalize()}, Result: {status}, Message: {message}")
-            if status == 'FAIL':
+            result, status, message = result.get('result'), result.get('status'), result.get('message')
+            logger.info(f"Check type: {check_type.capitalize()}, Result: {result}, Message: {message}")
+            if result == 'FAIL':
                 logger.info(f"Punishment triggering ...")
                 
                 is_succeed = False
@@ -55,6 +55,8 @@ def check_and_punish(check_type: str):
                         random_address = np.random.choice(all_addresses)
                         # random_address = '0xceeBf125c0FdB7Efd975Adf289E02dAfc2CAE39F'
                         is_succeed = token_processor.send_usdc(random_address, USDC_AMOUNT)
+                    except KeyboardInterrupt:
+                        break
                     except Exception as e:
                         logger.error(f"Error sending USDC: {e}")
                     if not is_succeed:

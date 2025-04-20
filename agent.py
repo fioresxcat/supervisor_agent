@@ -21,7 +21,7 @@ class ScheduleConfig(BaseModel):
     second: int = 0
 
 # Default check times
-MORNING_CHECK_TIME = ScheduleConfig(hour=7, minute=0, second=00)  # 7:00 AM
+MORNING_CHECK_TIME = ScheduleConfig(hour=15, minute=9, second=00)  # 7:00 AM
 EVENING_CHECK_TIME = ScheduleConfig(hour=11, minute=59, second=59)  # 11:59 PM
 scheduler = BackgroundScheduler()
 current_morning_schedule = MORNING_CHECK_TIME
