@@ -5,6 +5,7 @@ from eth_account import Account
 import json
 from dotenv import load_dotenv
 from logger import logger
+import pdb
 
 load_dotenv()
 
@@ -14,6 +15,10 @@ class TokenProcessor:
         self.private_key = os.getenv('PRIVATE_KEY')
         self.infura_url = os.getenv('INFURA_URL')
         self.usdc_contract_address = Web3.to_checksum_address(os.getenv('ARBITRUM_USDC_CONTRACT_ADDRESS'))
+        self.w3 = Web3(Web3.HTTPProvider(self.infura_url))
+
+
+    def reload(self):
         self.w3 = Web3(Web3.HTTPProvider(self.infura_url))
 
 

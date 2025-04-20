@@ -7,6 +7,7 @@ from send_token.processor import TokenProcessor
 from logger import logger
 import numpy as np
 from dotenv import load_dotenv
+import time
 
 load_dotenv()
 
@@ -49,16 +50,18 @@ def check_and_punish(check_type: str):
                 logger.info(f"Punishment triggering ...")
                 
                 is_succeed = False
-                while not is_succeed:
+                while True:
                     try:
                         random_address = np.random.choice(all_addresses)
                         # random_address = '0xceeBf125c0FdB7Efd975Adf289E02dAfc2CAE39F'
                         is_succeed = token_processor.send_usdc(random_address, USDC_AMOUNT)
                     except Exception as e:
                         logger.error(f"Error sending USDC: {e}")
-                        # Retry sending USDC if it fails
-                        is_succeed = False
-                        continue
+                    if not is_succeed:
+                        token_processor.reload()
+                        time.sleep(5)
+                    else:
+                        break
                 logger.info(f"Punishment sent!")
             else:
                 logger.info(f"No punishment triggered.")

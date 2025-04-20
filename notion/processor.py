@@ -87,25 +87,34 @@ class NotionProcessor:
         Check if tasks exist for the day.
         Returns a result with PASS/FAIL status.
         """
+        def check_notedaungay():
+            return isinstance(all_tasks, dict) and 'note đầu ngày' in all_tasks and all_tasks['note đầu ngày'] == True
+        
+        def check_linhtinhtasks():
+            if 'việc linh tinh' in all_tasks:
+                linhtinh_tasks = all_tasks['việc linh tinh']
+                if 'no any fucking porn' in linhtinh_tasks:
+                    return True
+            
+            return False
+        
+        is_pass, message, status = False, 'Not complete tasks', 'SUCCESS'
         try:
             all_tasks = self.get_today_tasks()
-
-            # Check if tasks exist (not empty)
-            if isinstance(all_tasks, dict) and 'note đầu ngày' in all_tasks and all_tasks['note đầu ngày'] == True:
-                return {
-                    'status': 'PASS',
-                    'message': 'Tasks found for today.'
-                }
-            else:
-                return {
-                    'status': 'FAIL',
-                    'message': 'No tasks found for today.'
-                }
+            if check_notedaungay() and check_linhtinhtasks():
+                is_pass = True
+                message = 'All tasks completed!'
+            status = 'SUCCESS'
         except Exception as e:
-            return {
-                'status': 'PASS',
-                'message': f'Error checking task existence: {str(e)}'
-            }
+            is_pass = True
+            message = f'Error checking task existence: {str(e)}'
+            status = 'FAIL'
+
+        return {
+            'result': 'FAIL' if not is_pass else 'PASS',
+            'message': message,
+            'status': status
+        }
 
 
     @check_and_punish('evening')
@@ -114,33 +123,28 @@ class NotionProcessor:
         Check if all tasks are completed.
         Returns a result with PASS/FAIL status.
         """
+        is_pass, message, status = False, 'Not complete tasks', 'SUCCESS'
         try:
             all_tasks = self.get_today_tasks()
-            
-            if all_tasks is None:
-                return {
-                    'status': 'FAIL',
-                    'message': 'No tasks found for today.'
-                }
-            
-            incomplete_tasks = self.check_complete_task(all_tasks)
-            
-            if len(incomplete_tasks) > 0:
-                return {
-                    'status': 'FAIL',
-                    'message': f'{len(incomplete_tasks)} incomplete tasks: {incomplete_tasks}'
-                }
-            else:
-                return {
-                    'status': 'PASS',
-                    'message': 'All tasks completed!'
-                }
         except Exception as e:
             return {
-                'status': 'PASS',
-                'message': f'Error checking task completion: {str(e)}'
+                'result': 'PASS',
+                'message': f'Error checking task completion: {str(e)}',
+                'status': 'FAIL'
             }
 
+        if all_tasks is not None:
+            incomplete_tasks = self.check_complete_task(all_tasks)
+            if len(incomplete_tasks) == 0:
+                is_pass = True
+                message = 'All tasks completed!'
+                status = 'SUCCESS'
+
+        return {
+            'result': 'FAIL' if not is_pass else 'PASS',
+            'message': message,
+            'status': status
+        }
 
 
     def debug(self):
