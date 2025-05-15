@@ -2,12 +2,14 @@ from datetime import datetime
 import pytz
 import functools
 import os
-from typing import Callable, Dict, Any, Optional
+from typing import Callable, Dict, Any, Optional, Literal
 from send_token.processor import TokenProcessor
 from logger import logger
 import numpy as np
 from dotenv import load_dotenv
 import time
+from dataclasses import dataclass
+import asyncio
 
 load_dotenv()
 
@@ -18,6 +20,12 @@ with open(f'resources/all_addresses.txt', 'r') as f:
 USDC_AMOUNT = float(os.getenv('USDC_AMOUNT', 0.01))
 logger.info(f"USDC_AMOUNT: {USDC_AMOUNT}")
 
+
+@dataclass
+class TaskCheckResponse:
+    result: Literal['PASS', 'FAIL']
+    message: str
+    status: Literal['SUCCESS', 'FAIL']
 
 def get_current_date() -> str:
     """
@@ -39,12 +47,12 @@ def check_and_punish(check_type: str):
     """
     def decorator(check_func: Callable) -> Callable:
         @functools.wraps(check_func)
-        def wrapper(*args, **kwargs) -> Dict[str, Any]:
+        def wrapper(*args, **kwargs) -> TaskCheckResponse:
             # Execute the check function
-            result = check_func(*args, **kwargs)
+            result: TaskCheckResponse = check_func(*args, **kwargs)
             
             # Check if the result indicates failure
-            result, status, message = result.get('result'), result.get('status'), result.get('message')
+            result, status, message = result.result, result.status, result.message
             logger.info(f"Check type: {check_type.capitalize()}, Result: {result}, Message: {message}")
             if result == 'FAIL':
                 logger.info(f"Punishment triggering ...")

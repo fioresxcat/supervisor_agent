@@ -8,13 +8,14 @@ import pdb
 
 load_dotenv()
 
-from utils import get_current_date, check_and_punish
+from utils import get_current_date, check_and_punish, TaskCheckResponse
 from llm.gemini import GeminiProcessor
 
 
 # page ids
 PAGE_IDS = {
-    '04/2025': '1c8eb477f91a808fb882d3bf01310b8d'
+    '04/2025': '1c8eb477f91a808fb882d3bf01310b8d',
+    '05/2025': '1e6eb477f91a805195c2fb2fb2551c67'
 }
 
 class NotionProcessor:
@@ -33,7 +34,7 @@ class NotionProcessor:
         toggle_text = block["toggle"]["rich_text"][0]["plain_text"]
         d = {}
         sub_blocks = self.notion.blocks.children.list(block_id=block["id"])
-        text_content = ''
+        text_content = []
         for sub_block in sub_blocks['results']:
             if sub_block['type'] == 'toggle':
                 text = sub_block["toggle"]["rich_text"][0]["plain_text"]
@@ -47,8 +48,9 @@ class NotionProcessor:
             elif sub_block['type'] == 'paragraph':
                 text = sub_block["paragraph"]["rich_text"][0]["plain_text"]
                 text = self.clean_emoji_from_text(text)
-                text_content += text
+                text_content.append(text)
         
+        text_content = '\n'.join(text_content)
         if len(d) == 0: # empty toggle
             d['text_content'] = text_content
             is_completed = '✅' in toggle_text
@@ -80,16 +82,18 @@ class NotionProcessor:
         all_tasks = self.parse_toggle_block(today_block)
         with open('test.json', 'w') as f:
             json.dump(all_tasks, f, indent=4, ensure_ascii=False)
-        
         return all_tasks
 
 
     def check_complete_task(self, all_tasks, prefix=''):
         incomplete_tasks = []
         for k, v in all_tasks.items():
-            if v == False:
-                incomplete_tasks.append(f'{prefix}/{k}')
-            elif isinstance(v, dict):
+            if not isinstance(v, dict):
+                continue
+            if set(v.keys()) == {'result', 'text_content'}:
+                if v['result'] == 'FAIL':
+                    incomplete_tasks.append(f'{prefix}/{k}')
+            else:
                 incomplete_tasks.extend(self.check_complete_task(v, f'{prefix}/{k}'))
         return incomplete_tasks
 
@@ -101,17 +105,17 @@ class NotionProcessor:
         prompt = (
             f'The morning note is the daily note where I write down random thoughts in the morning and write some inspriring quote to encourage me to do better today to complete all my tasks.\n'
             f'Each day, I require myself to write this note for 2 purposes: get up early in the morning and give my self some encouragement to complete tasks.\n'
-            f'Here is my morning note for today:\n{task_content}.\n'
+            f'Here is my morning note for today (it can be in vietnamese or english):\n\n{task_content}.\n\n'
             f'Please check if the morning note is actually valid and meaningful, or it\'s just some random bullshit that I write to mark the task as completed.'
             f'If it is valid, please return "PASS", otherwise return "FAIL". The response should only contain "PASS" or "FAIL" and nothing else.'
         )
         response = self.llm.llm_request(user_prompt=prompt)
         result = 'PASS' if 'pass' in response.lower() else 'FAIL'
         return result
-    
+
 
     @check_and_punish('morning')
-    def check_tasks_existence(self) -> Dict[str, Any]:
+    def check_tasks_existence(self) -> TaskCheckResponse:
         """
         Check if tasks exist for the day.
         Returns a result with PASS/FAIL status.
@@ -144,15 +148,15 @@ class NotionProcessor:
             message = f'Error checking task existence: {str(e)}'
             status = 'FAIL'
 
-        return {
-            'result': 'FAIL' if not is_pass else 'PASS',
-            'message': message,
-            'status': status
-        }
+        return TaskCheckResponse(
+            result='FAIL' if not is_pass else 'PASS',
+            message=message,
+            status=status
+        )
 
 
     @check_and_punish('evening')
-    def check_tasks_completion(self) -> Dict[str, Any]:
+    def check_tasks_completion(self) -> TaskCheckResponse:
         """
         Check if all tasks are completed.
         Returns a result with PASS/FAIL status.
@@ -161,11 +165,11 @@ class NotionProcessor:
         try:
             all_tasks = self.get_today_tasks()
         except Exception as e:
-            return {
-                'result': 'PASS',
-                'message': f'Error checking task completion: {str(e)}',
-                'status': 'FAIL'
-            }
+            return TaskCheckResponse(
+                result='PASS',
+                message=f'Error checking task completion: {str(e)}',
+                status='FAIL'
+            )
 
         if all_tasks is not None:
             incomplete_tasks = self.check_complete_task(all_tasks)
@@ -174,11 +178,11 @@ class NotionProcessor:
                 message = 'All tasks completed!'
                 status = 'SUCCESS'
 
-        return {
-            'result': 'FAIL' if not is_pass else 'PASS',
-            'message': message,
-            'status': status
-        }
+        return TaskCheckResponse(
+            result='FAIL' if not is_pass else 'PASS',
+            message=message,
+            status=status
+        )
 
 
     def debug(self):

@@ -24,5 +24,7 @@ class GeminiProcessor:
                 system_instruction=self.system_prompt
             )
         )
-        pdb.set_trace()
+        # with open('test.txt', 'w') as f:
+        #     f.write(user_prompt)
+        # pdb.set_trace()
         return response.text

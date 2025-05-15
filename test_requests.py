@@ -3,7 +3,7 @@ import json
 from datetime import datetime, timedelta
 
 # Base URL of your FastAPI server
-BASE_URL = "http://localhost:8000"
+BASE_URL = "http://localhost:6060"
 
 def test_root():
     """Test the root endpoint"""
@@ -101,14 +101,14 @@ def schedule_evening_check_in_5_seconds():
 
 if __name__ == "__main__":
     # Test all endpoints
-    test_root()
-    test_get_schedule()
+    # test_root()
+    # test_get_schedule()
     
     # Schedule a morning check 5 seconds from now
-    schedule_morning_check_in_5_seconds()
+    # schedule_morning_check_in_5_seconds()
     
     # Schedule an evening check 5 seconds from now
-    schedule_evening_check_in_5_seconds()
+    # schedule_evening_check_in_5_seconds()
     
     # # Update morning schedule to 7:00 AM
     # test_update_morning_schedule(7, 0)
@@ -120,5 +120,5 @@ if __name__ == "__main__":
     # test_get_schedule()
     
     # # Trigger manual checks
-    # test_check_morning_now()
+    test_check_morning_now()
     # test_check_evening_now() 

@@ -1,0 +1,13 @@
+The morning note is the daily note where I write down random thoughts in the morning and write some inspriring quote to encourage me to do better today to complete all my tasks.
+Each day, I require myself to write this note for 2 purposes: get up early in the morning and give my self some encouragement to complete tasks.
+Here is my morning note for today (it can be in vietnamese or english):
+
+hôm nay là sinh nhật ny rồi
+buổi sáng từ 7-11h mình sẽ ra cafe học
+sau đó về nhà ăn trưa, tawmd rồi ngủ
+chiều mang xe đi rửa, rồi lên đón ny đi thủy cung
+đi xong về nhà lấy bánh, lấy hoa, thay đồ, rồi đi ăn thoiii
+ăn xong thì về xe ngồi xíu rồi về đi ngủ
+mai đi chơi tiếp.
+
+Please check if the morning note is actually valid and meaningful, or it's just some random bullshit that I write to mark the task as completed.If it is valid, please return "PASS", otherwise return "FAIL". The response should only contain "PASS" or "FAIL" and nothing else.

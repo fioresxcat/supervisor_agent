@@ -13,6 +13,7 @@ import time as time_module
 from notion.processor import NotionProcessor
 from send_token.processor import TokenProcessor
 from logger import logger, log_api_request, log_api_response, log_check_result
+from telegram_bot.bot import TelegramProcessor
 
 
 class ScheduleConfig(BaseModel):
@@ -21,15 +22,15 @@ class ScheduleConfig(BaseModel):
     second: int = 0
 
 # Default check times
-MORNING_CHECK_TIME = ScheduleConfig(hour=15, minute=9, second=00)  # 7:00 AM
-EVENING_CHECK_TIME = ScheduleConfig(hour=11, minute=59, second=59)  # 11:59 PM
+MORNING_CHECK_TIME = ScheduleConfig(hour=7, minute=0, second=00)  # 7:00 AM
+EVENING_CHECK_TIME = ScheduleConfig(hour=23, minute=59, second=59)  # 11:59 PM
 scheduler = BackgroundScheduler()
 current_morning_schedule = MORNING_CHECK_TIME
 current_evening_schedule = EVENING_CHECK_TIME
 
 # Initialize processors
 notion_processor = NotionProcessor()
-
+telegram_processor = TelegramProcessor()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -52,6 +53,14 @@ async def lifespan(app: FastAPI):
         id='evening_task_check'
     )
     logger.info(f"Scheduled evening check for {current_evening_schedule.hour:02d}:{current_evening_schedule.minute:02d}:{current_evening_schedule.second:02d}")
+    
+    scheduler.add_job(
+        telegram_processor.sync_check_morning_images,
+        CronTrigger(hour=current_morning_schedule.hour, minute=current_morning_schedule.minute, second=current_morning_schedule.second),
+        # CronTrigger(hour=23, minute=9, second=59),
+        id='morning_telegram_check'
+    )
+    logger.info(f"Scheduled morning telegram check for {current_morning_schedule.hour:02d}:{current_morning_schedule.minute:02d}:{current_morning_schedule.second:02d}")
     
     yield
     
