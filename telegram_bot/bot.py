@@ -26,33 +26,16 @@ class TelegramProcessor:
         
         self.morning_prompts = [
             (
-                f'You are an expert image content analyzer.\n'
+                f'You are an expert image content analyzer. '
                 f'Your tasks is to analyze the provided image and check if it depicts:\n'
-                f'- A man is brushing his teeth\n'
-                f'- The man should be clearly visible with a toothbrush in his mouth/hand\n'
+                f'- A Scots English center building\n'
+                f'- The image should contain a building with Scots English banners outside\n'
                 f'Respond ONLY with:\n'
                 f'"true" - if the image content meets the criteria\n'
                 f'"false" - otherwise'
             ),
             (
-                f'You are an expert image content analyzer.\n'
-                f'Your tasks is to analyze the provided image and check if it depicts:\n'
-                f'- A man taking a selfie with his laptop visible\n'
-                f'- Both the man and laptop should be visible in the frame\n'
-                f'Respond ONLY with:\n'
-                f'"true" - if the image content meets the criteria\n'
-                f'"false" - otherwise'
-            ),
-            (
-                f'You are an expert image content analyzer.\n'
-                f'Your tasks is to analyze the provided image and check if it depicts:\n'
-                f'- A man\'s legs wearing his sport/running shoes\n'
-                f'Respond ONLY with:\n'
-                f'"true" - if the image content meets the criteria\n'
-                f'"false" - otherwise'
-            ),
-            (
-                f'You are an expert image content analyzer.\n'
+                f'You are an expert image content analyzer. '
                 f'Your tasks is to analyze the provided image and check if it depicts:\n'
                 f'- A shirtless man taking a shower\n'
                 f'- The shower and running water should be visible in the frame\n'
@@ -89,24 +72,15 @@ class TelegramProcessor:
         valid_images = []
         today = datetime.now(BANGKOK_TZ).date()
         for i, update in enumerate(updates):
-            # if i < len(updates) - len(self.morning_prompts):
-            #     continue
-            if i < len(updates) - 1:
+            if i < len(updates) - len(self.morning_prompts):
                 continue
-            pdb.set_trace()
+            # if i < len(updates) - 1:
+            #     continue
+            # pdb.set_trace()
             msg = update.message
             if msg.text:
                 print("Text:", msg.text)
 
-            elif msg.photo:
-                file_id = msg.photo[-1].file_id
-                # print('Photo:', file_id)
-                # save_path = f"downloads/{file_id}.jpg"
-                # async with self.bot:
-                #     file = await self.bot.get_file(file_id)
-                #     await file.download_to_drive(save_path)
-                # im = Image.open(save_path)
-                
             elif msg.document:
                 file_id = msg.document.file_id
                 file_name = msg.document.file_name or f"{file_id}"

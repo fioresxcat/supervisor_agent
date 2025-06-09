@@ -130,19 +130,16 @@ class NotionProcessor:
         def check_linhtinhtasks():
             if 'việc linh tinh' in all_tasks:
                 linhtinh_tasks = all_tasks['việc linh tinh']
-                if 'no any fucking porn' in linhtinh_tasks:
+                if 'no any fucking porn' in linhtinh_tasks and 'follow pomodoro strictly' in linhtinh_tasks:
                     return True
             return False
         
         is_pass, message, status = False, 'Not complete tasks', 'SUCCESS'
         try:
             all_tasks = self.get_today_tasks()
-            if check_notedaungay() and check_linhtinhtasks():
-                notedaungay_content = all_tasks['note đầu ngày']['text_content']
-                # if self.check_task_content(notedaungay_content) == 'PASS':
-                if True:
-                    is_pass = True
-                    message = 'All tasks completed!'
+            if check_linhtinhtasks():
+                is_pass = True
+                message = 'All tasks completed!'
 
         except Exception as e:
             is_pass = True

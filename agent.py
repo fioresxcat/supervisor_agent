@@ -63,8 +63,8 @@ async def lifespan(app: FastAPI):
     
     scheduler.add_job(
         telegram_processor.sync_check_workout_images,
-        # CronTrigger(hour=current_evening_schedule.hour, minute=current_evening_schedule.minute, second=current_evening_schedule.second),
-        CronTrigger(hour=9, minute=19, second=50),
+        CronTrigger(hour=current_evening_schedule.hour, minute=current_evening_schedule.minute, second=current_evening_schedule.second),
+        # CronTrigger(hour=9, minute=19, second=50),
         id='evening_workout_check'
     )
     logger.info(f"Scheduled evening workout check for {current_evening_schedule.hour:02d}:{current_evening_schedule.minute:02d}:{current_evening_schedule.second:02d}")
