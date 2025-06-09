@@ -11,6 +11,7 @@ from telegram import Bot
 from PIL import Image
 from PIL.ExifTags import TAGS
 from logger import logger
+import json_repair
 
 from llm.gemini import GeminiProcessor
 from utils import TaskCheckResponse, get_current_date, check_and_punish
@@ -61,6 +62,7 @@ class TelegramProcessor:
             ),
         ]
 
+        
 
     async def get_me(self):
         async with self.bot:
@@ -78,7 +80,6 @@ class TelegramProcessor:
                     # Convert UTC datetime to Bangkok timezone
                     local_dt = msg.date.astimezone(BANGKOK_TZ)
                     if local_dt.date() == today:
-                        update.message.date = local_dt  # Optionally overwrite for downstream
                         filtered.append(update)
             return filtered
 
@@ -88,16 +89,24 @@ class TelegramProcessor:
         valid_images = []
         today = datetime.now(BANGKOK_TZ).date()
         for i, update in enumerate(updates):
-            if i < len(updates) - len(self.morning_prompts):
+            # if i < len(updates) - len(self.morning_prompts):
+            #     continue
+            if i < len(updates) - 1:
                 continue
+            pdb.set_trace()
             msg = update.message
             if msg.text:
                 print("Text:", msg.text)
 
             elif msg.photo:
                 file_id = msg.photo[-1].file_id
-                print("Image: ", file_id)
-
+                # print('Photo:', file_id)
+                # save_path = f"downloads/{file_id}.jpg"
+                # async with self.bot:
+                #     file = await self.bot.get_file(file_id)
+                #     await file.download_to_drive(save_path)
+                # im = Image.open(save_path)
+                
             elif msg.document:
                 file_id = msg.document.file_id
                 file_name = msg.document.file_name or f"{file_id}"
@@ -131,10 +140,59 @@ class TelegramProcessor:
 
         return TaskCheckResponse(result='PASS', message='All images are valid', status='PASS')
 
+
+    async def check_workout_images(self):
+        updates = await self.get_today_updates()
+        today = datetime.now(BANGKOK_TZ).date()
+        result = []
+        for i, update in enumerate(updates):
+            msg = update.message
+            if msg.photo and msg.caption == 'theduc':
+                file_id = msg.photo[-1].file_id
+                print('Photo:', file_id)
+                save_path = f"downloads/{file_id}.jpg"
+                async with self.bot:
+                    file = await self.bot.get_file(file_id)
+                    await file.download_to_drive(save_path)
+                im = Image.open(save_path)
+                info = gemini.get_workout_info(im)
+                result.append(info)
+        
+        summed_distance = 0
+        for i, info in enumerate(result):
+            info = json_repair.loads(info)
+            date = info['date'] # DD/MM/YYYY
+            try:
+                date_obj = datetime.strptime(date, '%d/%m/%Y').date()
+                # Check if the date is today
+                if date_obj != today:
+                    continue
+                
+                # Process distance if date is today
+                distance = info['distance']
+                if isinstance(distance, str) and 'km' in distance.lower():
+                    try:
+                        distance_value = float(distance.lower().replace('km', '').strip())
+                        summed_distance += distance_value
+                    except ValueError:
+                        print(f"Could not parse distance: {distance}")
+                        return TaskCheckResponse(result='PASS', message='Could not parse distance', status='FAIL')
+            except ValueError:
+                print(f"Could not parse date: {date}")
+                return TaskCheckResponse(result='PASS', message='Could not parse date', status='FAIL')
+        if summed_distance < 2.5:
+            return TaskCheckResponse(result='FAIL', message=f'Summed distance: {summed_distance} km', status='PASS')
+        else:
+            return TaskCheckResponse(result='PASS', message=f'Summed distance: {summed_distance} km', status='PASS')
+
     
-    @check_and_punish('morning')
+    @check_and_punish('check_morning_images')
     def sync_check_morning_images(self):
         return asyncio.run(self.check_morning_images())
+    
+    @check_and_punish('check_workout_images')
+    def sync_check_workout_images(self):
+        return asyncio.run(self.check_workout_images())
 
 async def main():
     bot = Bot(token=os.getenv('TELEGRAM_BOT_TOKEN'))
@@ -177,7 +235,7 @@ async def main():
                                 print(f"{tag}: {dt_bangkok}")
 
 if __name__ == "__main__":
-    asyncio.run(main())
-    # processor = TelegramProcessor()
-    # res = asyncio.run(processor.check_morning_images())
-    # print(res)
+    # asyncio.run(main())
+    processor = TelegramProcessor()
+    res = asyncio.run(processor.check_workout_images())
+    print(res)

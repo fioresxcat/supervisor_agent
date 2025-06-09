@@ -114,7 +114,7 @@ class NotionProcessor:
         return result
 
 
-    @check_and_punish('morning')
+    @check_and_punish('check_tasks_existence')
     def check_tasks_existence(self) -> TaskCheckResponse:
         """
         Check if tasks exist for the day.
@@ -139,7 +139,8 @@ class NotionProcessor:
             all_tasks = self.get_today_tasks()
             if check_notedaungay() and check_linhtinhtasks():
                 notedaungay_content = all_tasks['note đầu ngày']['text_content']
-                if self.check_task_content(notedaungay_content) == 'PASS':
+                # if self.check_task_content(notedaungay_content) == 'PASS':
+                if True:
                     is_pass = True
                     message = 'All tasks completed!'
 
@@ -155,7 +156,7 @@ class NotionProcessor:
         )
 
 
-    @check_and_punish('evening')
+    @check_and_punish('check_tasks_completion')
     def check_tasks_completion(self) -> TaskCheckResponse:
         """
         Check if all tasks are completed.

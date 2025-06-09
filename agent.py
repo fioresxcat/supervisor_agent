@@ -57,11 +57,18 @@ async def lifespan(app: FastAPI):
     scheduler.add_job(
         telegram_processor.sync_check_morning_images,
         CronTrigger(hour=current_morning_schedule.hour, minute=current_morning_schedule.minute, second=current_morning_schedule.second),
-        # CronTrigger(hour=23, minute=9, second=59),
-        id='morning_telegram_check'
+        id='morning_images_check'
     )
-    logger.info(f"Scheduled morning telegram check for {current_morning_schedule.hour:02d}:{current_morning_schedule.minute:02d}:{current_morning_schedule.second:02d}")
+    logger.info(f"Scheduled morning images check for {current_morning_schedule.hour:02d}:{current_morning_schedule.minute:02d}:{current_morning_schedule.second:02d}")
     
+    scheduler.add_job(
+        telegram_processor.sync_check_workout_images,
+        # CronTrigger(hour=current_evening_schedule.hour, minute=current_evening_schedule.minute, second=current_evening_schedule.second),
+        CronTrigger(hour=9, minute=19, second=50),
+        id='evening_workout_check'
+    )
+    logger.info(f"Scheduled evening workout check for {current_evening_schedule.hour:02d}:{current_evening_schedule.minute:02d}:{current_evening_schedule.second:02d}")
+        
     yield
     
     # Shutdown: Stop the scheduler
