@@ -4,10 +4,11 @@ apscheduler
 pydantic
 python-dotenv
 notion-client
-web3
+web3==7.10.0
 requests
 APScheduler
 google-genai
 json-repair
 pytz
-numpy
+numpy==2.2.5
+Pillow==11.2.1
