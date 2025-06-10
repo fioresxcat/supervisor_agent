@@ -15,7 +15,8 @@ from llm.gemini import GeminiProcessor
 # page ids
 PAGE_IDS = {
     '04/2025': '1c8eb477f91a808fb882d3bf01310b8d',
-    '05/2025': '1e6eb477f91a805195c2fb2fb2551c67'
+    '05/2025': '1e6eb477f91a805195c2fb2fb2551c67',
+    '06/2025': '206eb477f91a8034b579f68bc2a8d282'
 }
 
 class NotionProcessor:
